@@ -8,7 +8,7 @@ false_emote = ":bomb:"
 
 def get_size():
     try:
-        size = int(input("Please input the length of the field: "))
+        size = int(input("Please input the length of the field (You shouldn't go over 12): "))
         if size >= 1:
             return size
         else:
@@ -22,7 +22,7 @@ def get_size():
 
 def get_difficulty():
     try:
-        difficulty = int(input("Please input the difficulty (0-100): "))
+        difficulty = int(input("Please input the difficulty (0-100) (35-40 is ideal): "))
         if 0 <= difficulty <= 100:
             return difficulty
         else:
