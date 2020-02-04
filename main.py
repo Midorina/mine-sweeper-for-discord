@@ -1,5 +1,10 @@
 import random
-import pyperclip
+
+can_copy = True
+try:
+    import pyperclip
+except ImportError:
+    can_copy = False
 
 done = False
 
@@ -66,12 +71,18 @@ def copy_to_clipboard(_text: str):
     if len(_text) > 2000:
         print("The character length exceeds 2000 characters! You'll most likely not able to post this on Discord."
               "However, I'm still going to copy it to your clipboard.")
-    try:
-        pyperclip.copy(_text)
-        print("It's been copied to your clipboard!")
 
-    except Exception as e:
-        print("An error occured while trying to copy to your clipboard: \n", e)
+    if can_copy:
+        try:
+            pyperclip.copy(_text)
+            print("It's been copied to your clipboard!")
+
+        except Exception as e:
+            print("An error occured while trying to copy to your clipboard: \n", e)
+
+    else:
+        print("I can't copy the game to your clipboard soo here is the text for you to copy yourself:")
+        print(_text)
 
 
 def convert_to_text(_map):
