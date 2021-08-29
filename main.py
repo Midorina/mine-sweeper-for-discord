@@ -1,15 +1,10 @@
 import random
-
-can_copy = True
-try:
-    import pyperclip
-except ImportError:
-    can_copy = False
+from typing import List
 
 done = False
 
-bomb_emote = ":bomb:"
-number_emotes = (
+BOMB_EMOTE = ":bomb:"
+NUMBER_EMOTES = (
     '0️⃣',
     '1️⃣',
     '2️⃣',
@@ -23,133 +18,133 @@ number_emotes = (
 )
 
 
-def get_size():
-    try:
-        _size = int(input("Please input the length of the field (You shouldn't go over 12): "))
-    except ValueError:
-        print("You dumb? Try to input a proper number next time. I'm asking again...")
-        return get_size()
+class MineSweeper:
+    def __init__(self):
+        self.size: int = 0
+        self.difficulty: int = 0
 
-    if _size >= 1:
-        return _size
-    else:
-        print("Size can't be less than 1!")
-        return get_size()
+        self.map: List[List[int]] = []
+        self.map_text: str = ""
 
-
-def get_difficulty():
-    try:
-        _difficulty = int(input("Please input the difficulty (0-100) (25-30 is ideal): "))
-    except ValueError:
-        print("You dumb? Try to input a proper number next time. I'm asking again...")
-        return get_difficulty()
-
-    if 0 <= _difficulty <= 100:
-        return _difficulty
-    else:
-        print("Try to stick to the 0-100 rule. You must input a number between 0 and 100.")
-        return get_difficulty()
-
-
-def status_check():
-    status = input("Type 1 to continue creating, or 0 to leave the program: ")
-
-    if status == "1":
-        return
-
-    elif status == "0":
-        global done
-        done = True
-        return
-
-    else:
-        print("You dumb? I'm asking again...")
-        return status_check()
-
-
-def copy_to_clipboard(_text: str):
-    if len(_text) > 2000:
-        print("The character length exceeds 2000 characters! You'll most likely not able to post this on Discord."
-              "However, I'm still going to copy it to your clipboard.")
-
-    if can_copy:
-        try:
-            pyperclip.copy(_text)
-            print("It's been copied to your clipboard!")
-
-        except Exception as e:
-            print("An error occured while trying to copy to your clipboard: \n", e)
-
-    else:
-        print("I can't copy the game to your clipboard soo here is the text for you to copy yourself:")
-        print(_text)
-
-
-def convert_to_text(_map):
-    _text = ""
-
-    for x in range(len(_map)):
-        for y in range(len(_map)):
-            if _map[x][y] == 1:
-                _text += "||" + number_emotes[get_adjacent_bomb_count(_map, x, y)] + "||"
+    def set_size(self):
+        while True:
+            try:
+                _size = int(input("Please input the length of the field (You shouldn't go over 12): "))
+            except ValueError:
+                print("You dumb? Try to input a proper number next time. I'm asking again...")
             else:
-                _text += "||" + bomb_emote + "||"
-        _text += "\n"
+                if _size < 1:
+                    print("Size can't be less than 1!")
+                else:
+                    self.size = _size
+                    return
 
-    return _text
-
-
-def get_adjacent_bomb_count(_map, x, y):
-    adjacent_coords = (
-        (x - 1, y - 1),
-        (x - 1, y),
-        (x - 1, y + 1),
-
-        (x, y - 1),
-        (x, y + 1),
-
-        (x + 1, y - 1),
-        (x + 1, y),
-        (x + 1, y + 1),
-    )
-
-    adjacent_bombs = []
-    for coord in adjacent_coords:
-        try:
-            adjacent_bombs.append(_map[coord[0]][coord[1]])
-        except IndexError:  # if outside of the map, pass
-            pass
-
-    adjacent_bombs = list(filter(lambda e: e == 0, adjacent_bombs))
-    return len(adjacent_bombs)
-
-
-def create(_size: int, _difficulty: int):
-    _map = []
-
-    for x in range(_size):
-        _map.append([])
-        for y in range(_size):
-            _random = random.randrange(101)
-            # if difficulty is high, chances of getting a higher number is less
-            if _difficulty > _random:  # if bomb
-                _map[x].append(0)
+    def set_difficulty(self):
+        while True:
+            try:
+                _difficulty = int(input("Please input the difficulty (0-100) (25-30 is ideal): "))
+            except ValueError:
+                print("You dumb? Try to input a proper number next time. I'm asking again...")
             else:
-                _map[x].append(1)
+                if not 0 <= _difficulty <= 100:
+                    print("Try to stick to the 0-100 rule. You must input a number between 0 and 100.")
+                else:
+                    self.difficulty = _difficulty
+                    return
 
-    return _map
+    def create_and_set_map(self):
+        _map = []
+
+        for x in range(self.size):
+            _map.append([])
+            for y in range(self.size):
+                _random = random.randrange(101)
+                # if difficulty is high, chances of getting a higher number is less
+                if self.difficulty > _random:  # if bomb
+                    _map[x].append(0)
+                else:
+                    _map[x].append(1)
+
+        self.map = _map
+
+    def convert_to_text(self):
+        _text = ""
+
+        for x in range(len(self.map)):
+            for y in range(len(self.map)):
+                if self.map[x][y] == 1:
+                    _text += "||" + NUMBER_EMOTES[self._get_adjacent_bomb_count(x, y)] + "||"
+                else:
+                    _text += "||" + BOMB_EMOTE + "||"
+            _text += "\n"
+
+        self.map_text = _text
+
+    def _get_adjacent_bomb_count(self, x, y):
+        adjacent_coords = (
+            (x - 1, y - 1),
+            (x - 1, y),
+            (x - 1, y + 1),
+
+            (x, y - 1),
+            (x, y + 1),
+
+            (x + 1, y - 1),
+            (x + 1, y),
+            (x + 1, y + 1),
+        )
+
+        adjacent_bombs = []
+        for coord in adjacent_coords:
+            try:
+                adjacent_bombs.append(self.map[coord[0]][coord[1]])
+            except IndexError:  # if outside of the map, pass
+                pass
+
+        adjacent_bombs = list(filter(lambda e: e == 0, adjacent_bombs))
+        return len(adjacent_bombs)
+
+    def copy_to_clipboard(self):
+        if len(self.map_text) > 2048:
+            print("The character length exceeds 2048 characters! You'll most likely not able to post this on Discord."
+                  "However, I'm still going to copy it to your clipboard.")
+
+        try:
+            from pyperclip import copy
+        except ImportError:
+            print("I can't copy the game to your clipboard, soo here is the text for you to copy yourself:\n")
+            print(self.map_text)
+        else:
+            try:
+                copy(self.map_text)
+                print("It's been copied to your clipboard! Go to Discord and do CTRL+V in chat.")
+
+            except Exception as e:
+                print("An error has occurred while trying to copy to your clipboard: \n", e)
+
+    @staticmethod
+    def status_check():
+        while True:
+            status = input("Type 1 to continue creating, or 0 to leave the program: ")
+
+            if status == "1":
+                return
+            elif status == "0":
+                global done
+                done = True
+                return
+            else:
+                print("You dumb? I'm asking again...")
+
+    def run(self):
+        self.set_size()
+        self.set_difficulty()
+        self.create_and_set_map()
+        self.convert_to_text()
+        self.copy_to_clipboard()
+        self.status_check()
 
 
 if __name__ == '__main__':
     while not done:
-        size = get_size()
-
-        difficulty = get_difficulty()
-
-        created_map = create(size, difficulty)
-
-        text = convert_to_text(created_map)
-
-        copy_to_clipboard(text)
-
-        status_check()
+        MineSweeper().run()
